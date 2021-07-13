@@ -1,39 +1,48 @@
 <template>
   <div class="home">
-    <h1>REF</h1>
-    <p>My NAME is {{ninja.name}} and my age is {{ninja.age}}</p>
-    <button @click="handleClick">Click me</button>
-    <button @click="ninja.age++">Increase age</button>
-    <input type="text" v-model="ninja.name">
-    <h1>Reactive</h1>
-    <p>My NAME is {{ninja2.name}} and my age is {{ninja2.age}}</p>
-    <button @click="handleClick2">Click me</button>
+    <h1>Hello</h1>
+    <input type="text" v-model="search">
+    <p>Search term - {{ search }}</p>
+    <div v-for="name in matchingNames" :key="name">
+        <p>{{name}}</p>
+    </div>
+    <button @click="stopWatching">stop Watching</button>
   </div>
 </template>
 
 <script>
-import { ref,reactive } from "vue"
+import { computed,ref, watch, watchEffect } from "vue"
 export default {
   name: 'Home',
-  // Setup Hook That execute before all the cycle hooks
-  // This keyword is not available inside the Setup Hook
   setup(){
-    console.log('setup');
-    //const p = ref(null);// p.value will be undefined untill we return it from the setup function
-    // Ref is const but the value can change
-    const ninja = ref({ name:'mario', age: 24 });
-    const ninja2 = reactive({ name:'Othy', age: 12 });// We can't use it with primitve values
+    const search = ref('');
+    const names = ref(['nano','bobo','show','jiki'])
 
-    const handleClick = ()=>{
-      ninja.value.name = "Othy"
-      ninja.value.age = 22
+    // Runs whenever "search" changes
+    const stopWatch = watch(search,()=>{
+      console.log("Search changes")
+    })
+
+    // Runs whenever a variable is defined inside the function changes and
+    // Runs once before the creation of the components (Get Data from DB)
+    const stopWatchEffect = watchEffect(()=>{
+      console.log("Watch Effect",search.value)
+    })
+    const matchingNames = computed(()=>{
+      return names.value.filter((name)=>{
+        // Return words that include the searching chars
+        return name.includes(search.value)
+      })
+    })
+
+    // Stop Watching by storing them in a variable and call the function;
+    const stopWatching = ()=>{
+      // Invoke the functions
+      stopWatch();
+      stopWatchEffect();
     }
-
-    const handleClick2 = ()=>{
-      ninja2.age = 69
-    }
-
-    return {ninja,handleClick,handleClick2,ninja2 }
+    
+    return {names,search,matchingNames,stopWatching}
 
   }
 }
